@@ -80,6 +80,30 @@ public extension CGPoint {
 }
 
 
+// MARK: - CGPoint Utilities
+public extension CGFloat {
+    public var designScaleValue: CGFloat {
+        return self * UIScreen.designScale
+    }
+}
+
+
+// MARK: - Double Utilities
+public extension Double {
+    public var designScaleValue: Double {
+        return self * Double(UIScreen.designScale)
+    }
+}
+
+
+// MARK: - Int Utilities
+public extension Int {
+    public var designScaleValue: CGFloat {
+        return CGFloat(self) * UIScreen.designScale
+    }
+}
+
+
 // MARK: - UIScreen Utilities
 public extension UIScreen {
     public static var width: CGFloat {
@@ -106,6 +130,8 @@ public extension UIScreen {
         return size.height
     }
     
+    
+    /// 设计图比例，默认设计图屏幕宽度为375pt
     public static var designScale: CGFloat = width / 375.0
     
     
@@ -125,29 +151,27 @@ public extension UIScreen {
     }
 }
 
-public extension CGFloat {
-    public var designScaleValue: CGFloat {
-        return self * UIScreen.designScale
-    }
-}
 
-public extension Double {
-    public var designScaleValue: Double {
-        return self * Double(UIScreen.designScale)
-    }
-}
-
-public extension Int {
-    public var designScaleValue: CGFloat {
-        return CGFloat(self) * UIScreen.designScale
-    }
-}
-
+// MARK: - UIViewController Utilities
 public extension UIViewController {
 
     public var safeArea: UIEdgeInsets {
         if #available(iOS 11, *) {
-            return view.safeAreaInsets
+            if UIScreen.isIrregular {
+                if isPortrait {
+                    return UIEdgeInsetsMake(44, 0, 34, 0)
+                } else if isLandscape {
+                    if prefersHomeIndicatorAutoHidden() {
+                        return UIEdgeInsetsMake(0, 44, 0, 44);
+                    } else {
+                        return UIEdgeInsetsMake(0, 44, 21, 44);
+                    }
+                } else {
+                    return UIEdgeInsets.zero
+                }
+            } else {
+                return UIEdgeInsets.zero
+            }
         } else {
             return UIEdgeInsets.zero
         }
@@ -155,7 +179,28 @@ public extension UIViewController {
     
     public var safeAreaLayoutGuide: UILayoutGuide {
         if #available(iOS 11, *) {
-            return view.safeAreaLayoutGuide
+            
+            var layoutGuide: UILayoutGuide? = nil
+            if let index = view.layoutGuides.index(where: { (inLayoutGuide) -> Bool in
+                return inLayoutGuide.identifier == "DPZeroLayoutGuide"
+            }) {
+                layoutGuide = view.layoutGuides[index]
+            } else {
+                layoutGuide = UILayoutGuide()
+                layoutGuide?.identifier = "DPZeroLayoutGuide"
+                view.addLayoutGuide(layoutGuide!)
+            }
+            
+            layoutGuide?.topAnchor.constraint(equalTo: view.topAnchor, constant: safeArea.top).isActive           = true
+            layoutGuide?.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: safeArea.left).isActive   = true
+            layoutGuide?.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: safeArea.right).isActive = true
+            layoutGuide?.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: safeArea.bottom).isActive     = true
+            
+            if let resultLayoutGuide = layoutGuide {
+                return resultLayoutGuide;
+            } else {
+                return view.zeroEdgesLayoutGuide
+            }
         } else {
             return view.zeroEdgesLayoutGuide
         }
@@ -173,6 +218,7 @@ public extension UIViewController {
 }
 
 
+// MARK: - UIView Utilities
 public extension UIView {
     
     @available(iOS, introduced: 9.0, deprecated: 11.0, message: "Use view.safeAreaLayoutGuide instead of view.zeroEdgesLayoutGuide")
@@ -196,6 +242,77 @@ public extension UIView {
             return layoutGuide
         }
     }
+    
+    /// 持有View的UIViewController，如果 UIViewController.view != self 则会返回nil
+    public var ownerViewController: UIViewController? {
+        if let ownerVC = next as? UIViewController, ownerVC.view == self {
+            return ownerVC
+        }
+        
+        return nil
+    }
 }
 
+class DPLayoutGuide: UILayoutGuide {
+    
+    var topConstraint: NSLayoutConstraint?
+    var leftConstraint: NSLayoutConstraint?
+    var rightConstraint: NSLayoutConstraint?
+    var bottomConstraint: NSLayoutConstraint?
+    
+    override init() {
+        super.init()
+        self.identifier = "DPLayoutGuide"
+        addObserver(self, forKeyPath: "owningView", options: .new, context: nil)
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder);
+        self.identifier = "DPLayoutGuide"
+        addObserver(self, forKeyPath: "owningView", options: .new, context: nil)
+    }
+    
+    deinit {
+        removeObserver(self, forKeyPath: "owningView")
+        NotificationCenter.default.removeObserver(self, name: Notification.Name.UIApplicationWillChangeStatusBarOrientation, object: nil)
+    }
+    
+    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+        if let oView = change?[.newKey] as? UIView, oView.next is UIViewController {
+            
+            topConstraint = topAnchor.constraint(equalTo: oView.topAnchor, constant: 200)
+            leftConstraint = leftAnchor.constraint(equalTo: oView.leftAnchor, constant: 0)
+            rightConstraint = rightAnchor.constraint(equalTo: oView.rightAnchor, constant: 0)
+            bottomConstraint = bottomAnchor.constraint(equalTo: oView.bottomAnchor, constant: -200)
+            
+            topConstraint?.isActive = true
+            leftConstraint?.isActive = true
+            rightConstraint?.isActive = true
+            bottomConstraint?.isActive = true
+            
+            NotificationCenter.default.addObserver(self, selector: #selector(willChange(notifi:)), name: Notification.Name.UIApplicationWillChangeStatusBarOrientation, object: nil)
+        }
+    }
+    
+    @objc
+    func willChange(notifi: Notification) {
+        
+        if let orientationRawValue = notifi.userInfo?[UIApplicationStatusBarOrientationUserInfoKey] as? Int {
+            
+            if let orientation = UIInterfaceOrientation(rawValue: orientationRawValue) {
+                if orientation.isPortrait {
+                    topConstraint?.constant = 100
+                    leftConstraint?.constant = 0
+                    rightConstraint?.constant = 0
+                    bottomConstraint?.constant = -100
+                } else if orientation.isLandscape {
+                    topConstraint?.constant = 0
+                    leftConstraint?.constant = 100
+                    rightConstraint?.constant = -100
+                    bottomConstraint?.constant = -21
+                }
+            }
+        }
+    }
+}
 

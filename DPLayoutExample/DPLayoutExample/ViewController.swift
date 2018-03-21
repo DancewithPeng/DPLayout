@@ -11,34 +11,57 @@ import DPLayout
 import SnapKit
 
 class ViewController: UIViewController {
+    
+    var topConstraint: NSLayoutConstraint?
 
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
+        // 1.完全自己布局 self.view
+        // 2.systemSafeAreaLayoutGuide 包括状态栏导航栏等等
+        // 3.仅仅是iPhoneX的安全区域，不包括状态栏导航栏等等 onlySafeAreaLayoutGuide
+        // DPSafeAreaLayoutGuide
         
-        print(UIScreen.screens)
-        print(UIScreen.width)
-        print(UIScreen.size)
-        print(UIScreen.height)
-        
-        print(UIScreen.main.scale)
-        print(UIScreen.main.nativeScale)
-        print(UIScreen.designScale)
-        
-        let v = UIView(frame: CGRect.zero)
+//        print(UIScreen.screens)
+//        print(UIScreen.width)
+//        print(UIScreen.size)
+//        print(UIScreen.height)
+//
+//        print(UIScreen.main.scale)
+//        print(UIScreen.main.nativeScale)
+//        print(UIScreen.designScale)
+//
+        let v = UIView(frame: CGRect.make(x: 0, y: 60, width: 100, height: 100))
         v.backgroundColor = UIColor.red
         view.addSubview(v)
+        let container = DPLayoutGuide()
+        v.tag = 1001;
+        v.translatesAutoresizingMaskIntoConstraints = false
+        view.addLayoutGuide(container)
         
         v.snp.makeConstraints { (make) in
-            make.right.equalTo(safeAreaLayoutGuide).offset(-30)
-            make.top.equalTo(safeAreaLayoutGuide).offset(30)
-            make.size.equalTo(CGSize.make(width: 300, height: 300))
+            make.edges.equalTo(container);
         }
         
-        print("--------------")
-        print(view.zeroEdgesLayoutGuide)
-        print("--------------")
+        
+        
+//        v.leadingAnchor.constraint(equalTo: container.leadingAnchor).isActive = true
+//        v.heightAnchor.constraint(equalTo: container.heightAnchor).isActive = true
+//        v.widthAnchor.constraint(equalTo: container.widthAnchor).isActive = true
+//        v.trailingAnchor.constraint(equalTo: container.trailingAnchor).isActive = true
+//
+//        v.snp.makeConstraints { (make) in
+//            make.right.equalTo(safeAreaLayoutGuide).offset(-30)
+//            make.top.equalTo(safeAreaLayoutGuide).offset(30)
+//            make.size.equalTo(CGSize.make(width: 300, height: 300))
+//        }
+//
+//
+//        print("--------------")
+//        print(view.zeroEdgesLayoutGuide)
+//        print("--------------")
+        
         
         
         /*
@@ -84,6 +107,18 @@ class ViewController: UIViewController {
         spaceRight.leadingAnchor.constraint(equalTo: block2.trailingAnchor).isActive = true
         spaceRight.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
          */
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(test(notification:)), name: Notification.Name.UIApplicationWillChangeStatusBarOrientation, object: nil)
+    }
+    
+    @objc func test(notification: Notification) {
+        if UIApplication.shared.statusBarOrientation.isPortrait {
+            
+        }
+    }
+    
+    override func prefersHomeIndicatorAutoHidden() -> Bool {
+        return true
     }
 
     override func didReceiveMemoryWarning() {
@@ -91,33 +126,30 @@ class ViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
-    override func viewDidLayoutSubviews() {
+    override func viewWillLayoutSubviews() {
         if UIScreen.isPortrait {
-            print("竖屏")
+            print("||||||||||")
+            topConstraint?.constant = 100
+        } else {
+            print("-----------")            
+            topConstraint?.constant = 200
         }
+    }
+    
+    override func viewSafeAreaInsetsDidChange() {
         
-        if UIScreen.isLandscape {
-            print("横屏")
-        }
-        
-        if isPortrait {
-            print("竖屏")
-        }
-        
-        if isLandscape {
-            print("横屏")
-        }
-        
+    }        
+    
+    override func viewDidLayoutSubviews() {
         if #available(iOS 11, *) {
-            print(view.zeroEdgesLayoutGuide)
-            print(topLayoutGuide)
+            print(view.safeAreaLayoutGuide)
+            print(view.safeAreaLayoutGuide.topAnchor)
+            print(view.safeAreaLayoutGuide.leadingAnchor)
+            print(view.safeAreaLayoutGuide.bottomAnchor)
+            print(view.safeAreaLayoutGuide.rightAnchor)
+            
+            // print(safeAreaLayoutGuide)
         }
-        
-        print(topLayoutGuide)
-        
-        print(safeAreaLayoutGuide)
-        print("=========")
-        print(view.layoutGuides)
     }
 }
 
