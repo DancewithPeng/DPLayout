@@ -253,22 +253,24 @@ public extension UIView {
     }
 }
 
-class DPLayoutGuide: UILayoutGuide {
+
+/// 安全区域布局指南
+public class DPSafeAreaLayoutGuide: UILayoutGuide {
     
-    var topConstraint: NSLayoutConstraint?
-    var leftConstraint: NSLayoutConstraint?
-    var rightConstraint: NSLayoutConstraint?
-    var bottomConstraint: NSLayoutConstraint?
+    public var topConstraint: NSLayoutConstraint?
+    public var leftConstraint: NSLayoutConstraint?
+    public var rightConstraint: NSLayoutConstraint?
+    public var bottomConstraint: NSLayoutConstraint?
     
-    override init() {
+    public override init() {
         super.init()
-        self.identifier = "DPLayoutGuide"
+        self.identifier = "DPSafeAreaLayoutGuide"
         addObserver(self, forKeyPath: "owningView", options: .new, context: nil)
     }
     
-    required init?(coder aDecoder: NSCoder) {
+    public required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder);
-        self.identifier = "DPLayoutGuide"
+        self.identifier = "DPSafeAreaLayoutGuide"
         addObserver(self, forKeyPath: "owningView", options: .new, context: nil)
     }
     
@@ -277,7 +279,7 @@ class DPLayoutGuide: UILayoutGuide {
         NotificationCenter.default.removeObserver(self, name: Notification.Name.UIApplicationWillChangeStatusBarOrientation, object: nil)
     }
     
-    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+    public override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         if let oView = change?[.newKey] as? UIView, oView.next is UIViewController {
             
             topConstraint = topAnchor.constraint(equalTo: oView.topAnchor, constant: 200)
@@ -314,5 +316,15 @@ class DPLayoutGuide: UILayoutGuide {
             }
         }
     }
+    
+    
+}
+
+class DPSystemSafeAreaLayoutGuide: DPSafeAreaLayoutGuide {
+    
+}
+
+class DPOnlySafeAreaLayoutGuide: DPSafeAreaLayoutGuide {
+    
 }
 

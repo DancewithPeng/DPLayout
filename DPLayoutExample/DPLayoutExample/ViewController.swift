@@ -32,17 +32,18 @@ class ViewController: UIViewController {
 //        print(UIScreen.main.nativeScale)
 //        print(UIScreen.designScale)
 //
-        let v = UIView(frame: CGRect.make(x: 0, y: 60, width: 100, height: 100))
-        v.backgroundColor = UIColor.red
-        view.addSubview(v)
-        let container = DPLayoutGuide()
-        v.tag = 1001;
-        v.translatesAutoresizingMaskIntoConstraints = false
-        view.addLayoutGuide(container)
+//        let v = UIView(frame: CGRect.make(x: 0, y: 60, width: 100, height: 100))
+//        v.backgroundColor = UIColor.red
+//        view.addSubview(v)
+//        let container = DPSafeAreaLayoutGuide()
+//        v.tag = 1001;
+//        v.translatesAutoresizingMaskIntoConstraints = false
+//        view.addLayoutGuide(container)
+//        
+//        v.snp.makeConstraints { (make) in
+//            make.edges.equalTo(container);
+//        }
         
-        v.snp.makeConstraints { (make) in
-            make.edges.equalTo(container);
-        }
         
         
         
