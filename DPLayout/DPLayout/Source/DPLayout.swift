@@ -160,10 +160,18 @@ public extension UIScreen {
 
 // MARK: - UIViewController Layout Utilities
 public extension UIViewController {
+
+    public var systemSafeArea: UIEdgeInsets {
+        if #available(iOS 11, *) {
+            return view.safeAreaInsets
+        } else {
+            return UIEdgeInsetsMake(topLayoutGuide.length, 0, 0, bottomLayoutGuide.length)
+        }
+    }
     
     /// 安全区域
-    public var safeArea: UIEdgeInsets {
-        return safeArea(withOrientation: UIApplication.shared.statusBarOrientation)
+    public var onlySafeArea: UIEdgeInsets {
+        return onlySafeArea(withOrientation: UIApplication.shared.statusBarOrientation)
     }
     
     
@@ -171,7 +179,7 @@ public extension UIViewController {
     ///
     /// - Parameter orientation: 方向
     /// - Returns: 根据方向返回对应的安全区域
-    public func safeArea(withOrientation orientation: UIInterfaceOrientation) -> UIEdgeInsets {
+    public func onlySafeArea(withOrientation orientation: UIInterfaceOrientation) -> UIEdgeInsets {
         
         if #available(iOS 11, *) {
             if UIScreen.isIrregular {
@@ -296,7 +304,7 @@ public class DPOnlySafeAreaLayoutGuide: DPSafeAreaLayoutGuide {
     // 更新约束值
     func updateConstraintConstant(orientation: UIInterfaceOrientation) {
 
-        if let targetSafeArea = owningView?.ownerViewController?.safeArea(withOrientation: orientation) {
+        if let targetSafeArea = owningView?.ownerViewController?.onlySafeArea(withOrientation: orientation) {
             topConstraint?.constant         = targetSafeArea.top
             leadingConstraint?.constant     = targetSafeArea.left
             trailingConstraint?.constant    = -targetSafeArea.right
