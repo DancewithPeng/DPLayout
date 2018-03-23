@@ -8,6 +8,14 @@
 
 import UIKit
 
+// MARK: - UIEdgeInsets Layout Utilities
+public extension UIEdgeInsets {
+    
+    /// 设计图比例值
+    public var designScaleValue: UIEdgeInsets {
+        return UIEdgeInsetsMake(top.designScaleValue, left.designScaleValue, bottom.designScaleValue, right.designScaleValue)
+    }
+}
 
 // MARK: - CGRect Layout Utilities
 public extension CGRect {

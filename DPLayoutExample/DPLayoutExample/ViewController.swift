@@ -38,7 +38,7 @@ class ViewController: UIViewController {
         testView.backgroundColor = UIColor.red
         view.addSubview(testView)
         testView.snp.makeConstraints { (make) in
-            make.edges.equalTo(view.systemSafeAreaLayoutGuide).inset(UIEdgeInsetsMake(10, 10, 10, 10))
+            make.edges.equalTo(view.systemSafeAreaLayoutGuide).inset(UIEdgeInsetsMake(20, 20, 20, 20).designScaleValue)
         }
         
         testView4.backgroundColor = UIColor.purple
