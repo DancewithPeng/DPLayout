@@ -8,7 +8,8 @@
 
 import UIKit
 
-// MARK: - CGRect Utilities
+
+// MARK: - CGRect Layout Utilities
 public extension CGRect {
     public static func make(x: CGFloat, y: CGFloat, width: CGFloat, height: CGFloat) -> CGRect {
         return CGRect(x: x, y: y, width: width, height: height)
@@ -26,21 +27,16 @@ public extension CGRect {
         return CGRect(origin: origin, size: size)
     }
     
+    
+    /// 设计图比例值
     public var designScaleValue: CGRect {
         return CGRect.make(origin: origin.designScaleValue, size: size.designScaleValue)
     }
 }
 
 
-// MARK: - CGSize Utilities
+// MARK: - CGSize Layout Utilities
 public extension CGSize {
-    public var maxLength: CGFloat {
-        return width > height ? width : height
-    }
-    
-    public var minLength: CGFloat {
-        return width < height ? width : height
-    }
     
     public static func make(width: CGFloat, height: CGFloat) -> CGSize {
         return CGSize(width: width, height: height)
@@ -54,13 +50,23 @@ public extension CGSize {
         return CGSize(width: width, height: height)
     }
     
+    
+    /// 设计
     public var designScaleValue: CGSize {
         return CGSize.make(width: width.designScaleValue, height: height.designScaleValue)
+    }
+    
+    public var maxLength: CGFloat {
+        return width > height ? width : height
+    }
+    
+    public var minLength: CGFloat {
+        return width < height ? width : height
     }
 }
 
 
-// MARK: - CGPoint Utilities
+// MARK: - CGPoint Layout Utilities
 public extension CGPoint {
     public static func make(x: CGFloat, y: CGFloat) -> CGPoint {
         return CGPoint(x: x, y: y)
@@ -80,7 +86,7 @@ public extension CGPoint {
 }
 
 
-// MARK: - CGPoint Utilities
+// MARK: - CGPoint Layout Utilities
 public extension CGFloat {
     public var designScaleValue: CGFloat {
         return self * UIScreen.designScale
@@ -88,7 +94,7 @@ public extension CGFloat {
 }
 
 
-// MARK: - Double Utilities
+// MARK: - Double Layout Utilities
 public extension Double {
     public var designScaleValue: Double {
         return self * Double(UIScreen.designScale)
@@ -96,7 +102,7 @@ public extension Double {
 }
 
 
-// MARK: - Int Utilities
+// MARK: - Int Layout Utilities
 public extension Int {
     public var designScaleValue: CGFloat {
         return CGFloat(self) * UIScreen.designScale
@@ -104,7 +110,7 @@ public extension Int {
 }
 
 
-// MARK: - UIScreen Utilities
+// MARK: - UIScreen Layout Utilities
 public extension UIScreen {
     public static var width: CGFloat {
         return size.width
@@ -135,36 +141,47 @@ public extension UIScreen {
     public static var designScale: CGFloat = width / 375.0
     
     
-    // 是否为异形屏幕
+    // 是否为异形(iPhoneX)屏幕
     public static var isIrregular: Bool {
         return Int(size.maxLength) == 812 ? true : false
     }
     
     // 是否为竖屏
     public static var isPortrait: Bool {
-        return (UIApplication.shared.statusBarOrientation == UIInterfaceOrientation.portrait || UIApplication.shared.statusBarOrientation == UIInterfaceOrientation.portraitUpsideDown)
+        return UIApplication.shared.statusBarOrientation.isPortrait
     }
     
     // 是否为横屏
     public static var isLandscape: Bool {
-        return (UIApplication.shared.statusBarOrientation == UIInterfaceOrientation.landscapeLeft || UIApplication.shared.statusBarOrientation == UIInterfaceOrientation.landscapeRight)
+        return UIApplication.shared.statusBarOrientation.isLandscape
     }
 }
 
 
-// MARK: - UIViewController Utilities
+// MARK: - UIViewController Layout Utilities
 public extension UIViewController {
-
+    
+    /// 安全区域
     public var safeArea: UIEdgeInsets {
+        return safeArea(withOrientation: UIApplication.shared.statusBarOrientation)
+    }
+    
+    
+    /// 返回ViewController的安全区域
+    ///
+    /// - Parameter orientation: 方向
+    /// - Returns: 根据方向返回对应的安全区域
+    public func safeArea(withOrientation orientation: UIInterfaceOrientation) -> UIEdgeInsets {
+        
         if #available(iOS 11, *) {
             if UIScreen.isIrregular {
-                if isPortrait {
+                if orientation.isPortrait {
                     return UIEdgeInsetsMake(44, 0, 34, 0)
-                } else if isLandscape {
-                    if prefersHomeIndicatorAutoHidden() {
-                        return UIEdgeInsetsMake(0, 44, 0, 44);
+                } else if orientation.isLandscape {
+                    if prefersHomeIndicatorAutoHidden() == true {
+                        return UIEdgeInsetsMake(0, 44, 0, 44)
                     } else {
-                        return UIEdgeInsetsMake(0, 44, 21, 44);
+                        return UIEdgeInsetsMake(0, 44, 21, 44)
                     }
                 } else {
                     return UIEdgeInsets.zero
@@ -177,39 +194,12 @@ public extension UIViewController {
         }
     }
     
-    public var safeAreaLayoutGuide: UILayoutGuide {
-        if #available(iOS 11, *) {
-            
-            var layoutGuide: UILayoutGuide? = nil
-            if let index = view.layoutGuides.index(where: { (inLayoutGuide) -> Bool in
-                return inLayoutGuide.identifier == "DPZeroLayoutGuide"
-            }) {
-                layoutGuide = view.layoutGuides[index]
-            } else {
-                layoutGuide = UILayoutGuide()
-                layoutGuide?.identifier = "DPZeroLayoutGuide"
-                view.addLayoutGuide(layoutGuide!)
-            }
-            
-            layoutGuide?.topAnchor.constraint(equalTo: view.topAnchor, constant: safeArea.top).isActive           = true
-            layoutGuide?.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: safeArea.left).isActive   = true
-            layoutGuide?.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: safeArea.right).isActive = true
-            layoutGuide?.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: safeArea.bottom).isActive     = true
-            
-            if let resultLayoutGuide = layoutGuide {
-                return resultLayoutGuide;
-            } else {
-                return view.zeroEdgesLayoutGuide
-            }
-        } else {
-            return view.zeroEdgesLayoutGuide
-        }
-    }
     
     // 是否为竖屏
     public var isPortrait: Bool {
         return UIScreen.isPortrait
     }
+    
     
     // 是否为横屏
     public var isLandscape: Bool {
@@ -218,31 +208,9 @@ public extension UIViewController {
 }
 
 
-// MARK: - UIView Utilities
+// MARK: - UIView Layout Utilities
 public extension UIView {
-    
-    @available(iOS, introduced: 9.0, deprecated: 11.0, message: "Use view.safeAreaLayoutGuide instead of view.zeroEdgesLayoutGuide")
-    /// 零边距的布局约束
-    public var zeroEdgesLayoutGuide: UILayoutGuide {
         
-        if let index = layoutGuides.index(where: { (layoutGuide) -> Bool in
-            return layoutGuide.identifier == "DPZeroLayoutGuide"
-        }) {
-            return layoutGuides[index]
-        } else {
-            let layoutGuide = UILayoutGuide()
-            layoutGuide.identifier = "DPZeroLayoutGuide"
-            addLayoutGuide(layoutGuide)
-            
-            layoutGuide.topAnchor.constraint(equalTo: topAnchor).isActive           = true
-            layoutGuide.leadingAnchor.constraint(equalTo: leadingAnchor).isActive   = true
-            layoutGuide.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
-            layoutGuide.bottomAnchor.constraint(equalTo: bottomAnchor).isActive     = true
-            
-            return layoutGuide
-        }
-    }
-    
     /// 持有View的UIViewController，如果 UIViewController.view != self 则会返回nil
     public var ownerViewController: UIViewController? {
         if let ownerVC = next as? UIViewController, ownerVC.view == self {
@@ -251,16 +219,108 @@ public extension UIView {
         
         return nil
     }
+    
+    /// 系统的安全区域，自动减去了状态栏、导航栏等区域
+    public var systemSafeAreaLayoutGuide: UILayoutGuide {
+        if #available(iOS 11, *) {
+            return safeAreaLayoutGuide
+        } else {
+            if let index = layoutGuides.index(where: { $0.identifier == "DPSystemSafeAreaLayoutGuide" }) {
+                return layoutGuides[index]
+            } else {
+                
+                let layoutGuide = UILayoutGuide()
+                layoutGuide.identifier = "DPSystemSafeAreaLayoutGuide"
+                addLayoutGuide(layoutGuide)
+                
+                if let ownerVC = ownerViewController {
+                    layoutGuide.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
+                    layoutGuide.leadingAnchor.constraint(equalTo: leadingAnchor).isActive = true
+                    layoutGuide.topAnchor.constraint(equalTo: ownerVC.topLayoutGuide.bottomAnchor).isActive = true
+                    layoutGuide.bottomAnchor.constraint(equalTo: ownerVC.bottomLayoutGuide.topAnchor).isActive = true
+                } else {
+                    layoutGuide.leadingAnchor.constraint(equalTo: leadingAnchor).isActive = true
+                    layoutGuide.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
+                    layoutGuide.topAnchor.constraint(equalTo: topAnchor).isActive = true
+                    layoutGuide.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
+                }
+                
+                return layoutGuide
+            }
+        }
+    }
+    
+    /// 仅仅返回异形屏(iPhoneX)的安全区域，不会自动减去状态栏、导航栏等区域
+    public var onlySafeAreaLayoutGuide: UILayoutGuide {
+        
+        if let index = layoutGuides.index(where: { $0.identifier == "DPOnlySafeAreaLayoutGuide" }) {
+            return layoutGuides[index]
+        } else {
+            let layoutGuide = DPOnlySafeAreaLayoutGuide()
+            layoutGuide.identifier = "DPOnlySafeAreaLayoutGuide"
+            addLayoutGuide(layoutGuide)
+            return layoutGuide
+        }
+    }
+    
+    
+    /// 是否为竖屏
+    public var isPortrait: Bool {
+        return UIScreen.isPortrait
+    }
+    
+    
+    /// 是否为横屏
+    public var isLandscape: Bool {
+        return UIScreen.isLandscape
+    }
 }
+
+
+// MARK: - DPOnlySafeAreaLayoutGuide
+
+
+/// 异形屏(iPhoneX)的安全区域
+public class DPOnlySafeAreaLayoutGuide: DPSafeAreaLayoutGuide {
+    
+    // LayoutGuide被添加到View上时调用
+    override func didAddToOwningView() {
+        updateConstraintConstant(orientation: UIApplication.shared.statusBarOrientation)
+    }
+    
+    // 屏幕方向改变时调用
+    override func didChangeInterfaceOrientation(orientation: UIInterfaceOrientation) {
+        updateConstraintConstant(orientation: orientation)
+    }
+    
+    // 更新约束值
+    func updateConstraintConstant(orientation: UIInterfaceOrientation) {
+
+        if let targetSafeArea = owningView?.ownerViewController?.safeArea(withOrientation: orientation) {
+            topConstraint?.constant         = targetSafeArea.top
+            leadingConstraint?.constant     = targetSafeArea.left
+            trailingConstraint?.constant    = -targetSafeArea.right
+            bottomConstraint?.constant      = -targetSafeArea.bottom
+        }
+    }
+}
+
+
+// MARK: - DPOnlySafeAreaLayoutGuide
 
 
 /// 安全区域布局指南
 public class DPSafeAreaLayoutGuide: UILayoutGuide {
     
+    /// 顶部约束
     public var topConstraint: NSLayoutConstraint?
-    public var leftConstraint: NSLayoutConstraint?
-    public var rightConstraint: NSLayoutConstraint?
+    /// 前部约束
+    public var leadingConstraint: NSLayoutConstraint?
+    /// 尾部约束
+    public var trailingConstraint: NSLayoutConstraint?
+    /// 底部约束
     public var bottomConstraint: NSLayoutConstraint?
+    
     
     public override init() {
         super.init()
@@ -269,7 +329,7 @@ public class DPSafeAreaLayoutGuide: UILayoutGuide {
     }
     
     public required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder);
+        super.init(coder: aDecoder)
         self.identifier = "DPSafeAreaLayoutGuide"
         addObserver(self, forKeyPath: "owningView", options: .new, context: nil)
     }
@@ -282,49 +342,39 @@ public class DPSafeAreaLayoutGuide: UILayoutGuide {
     public override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         if let oView = change?[.newKey] as? UIView, oView.next is UIViewController {
             
-            topConstraint = topAnchor.constraint(equalTo: oView.topAnchor, constant: 200)
-            leftConstraint = leftAnchor.constraint(equalTo: oView.leftAnchor, constant: 0)
-            rightConstraint = rightAnchor.constraint(equalTo: oView.rightAnchor, constant: 0)
-            bottomConstraint = bottomAnchor.constraint(equalTo: oView.bottomAnchor, constant: -200)
+            topConstraint = topAnchor.constraint(equalTo: oView.topAnchor, constant: 0)
+            leadingConstraint = leftAnchor.constraint(equalTo: oView.leftAnchor, constant: 0)
+            trailingConstraint = rightAnchor.constraint(equalTo: oView.rightAnchor, constant: 0)
+            bottomConstraint = bottomAnchor.constraint(equalTo: oView.bottomAnchor, constant: 0)
             
             topConstraint?.isActive = true
-            leftConstraint?.isActive = true
-            rightConstraint?.isActive = true
+            leadingConstraint?.isActive = true
+            trailingConstraint?.isActive = true
             bottomConstraint?.isActive = true
             
-            NotificationCenter.default.addObserver(self, selector: #selector(willChange(notifi:)), name: Notification.Name.UIApplicationWillChangeStatusBarOrientation, object: nil)
+            NotificationCenter.default.addObserver(self, selector: #selector(statusBarOrientationwillChange(notifi:)), name: Notification.Name.UIApplicationWillChangeStatusBarOrientation, object: nil)
+            
+            self.didAddToOwningView()
         }
     }
     
     @objc
-    func willChange(notifi: Notification) {
-        
+    func statusBarOrientationwillChange(notifi: Notification) {
         if let orientationRawValue = notifi.userInfo?[UIApplicationStatusBarOrientationUserInfoKey] as? Int {
-            
             if let orientation = UIInterfaceOrientation(rawValue: orientationRawValue) {
-                if orientation.isPortrait {
-                    topConstraint?.constant = 100
-                    leftConstraint?.constant = 0
-                    rightConstraint?.constant = 0
-                    bottomConstraint?.constant = -100
-                } else if orientation.isLandscape {
-                    topConstraint?.constant = 0
-                    leftConstraint?.constant = 100
-                    rightConstraint?.constant = -100
-                    bottomConstraint?.constant = -21
-                }
+                self.didChangeInterfaceOrientation(orientation: orientation)
             }
         }
     }
     
+    /// LayoutGuide被添加到OwningView
+    func didAddToOwningView() {
+        
+    }
     
-}
-
-class DPSystemSafeAreaLayoutGuide: DPSafeAreaLayoutGuide {
-    
-}
-
-class DPOnlySafeAreaLayoutGuide: DPSafeAreaLayoutGuide {
-    
+    /// 界面方向改变
+    func didChangeInterfaceOrientation(orientation: UIInterfaceOrientation) {
+        
+    }
 }
 
