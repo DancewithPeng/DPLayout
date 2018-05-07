@@ -15,7 +15,7 @@ class ViewController: UIViewController {
     lazy var testView = UIView(frame: CGRect.zero)
     lazy var testView2 = UIView(frame: CGRect.zero)
     lazy var testView3 = UIView(frame: CGRect.zero)
-    lazy var testView4 = UIView(frame: CGRect.make(x: 60, y: 60, width: 305, height: 305).designScaleValue)
+    lazy var testView4 = UIView(frame: CGRect(x: 60, y: 60, width: 305, height: 305).designScaleValue)
     
     override func viewDidLoad() {
         super.viewDidLoad()

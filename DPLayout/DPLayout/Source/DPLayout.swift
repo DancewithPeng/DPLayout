@@ -19,26 +19,10 @@ public extension UIEdgeInsets {
 
 // MARK: - CGRect Layout Utilities
 public extension CGRect {
-    public static func make(x: CGFloat, y: CGFloat, width: CGFloat, height: CGFloat) -> CGRect {
-        return CGRect(x: x, y: y, width: width, height: height)
-    }
-    
-    public static func make(x: Double, y: Double, width: Double, height: Double) -> CGRect {
-        return CGRect(x: x, y: y, width: width, height: height)
-    }
-    
-    public static func make(x: Int, y: Int, width: Int, height: Int) -> CGRect {
-        return CGRect(x: x, y: y, width: width, height: height)
-    }
-    
-    public static func make(origin: CGPoint, size: CGSize) -> CGRect {
-        return CGRect(origin: origin, size: size)
-    }
-    
     
     /// 设计图比例值
     public var designScaleValue: CGRect {
-        return CGRect.make(origin: origin.designScaleValue, size: size.designScaleValue)
+        return CGRect(origin: origin.designScaleValue, size: size.designScaleValue)
     }
 }
 
@@ -46,22 +30,9 @@ public extension CGRect {
 // MARK: - CGSize Layout Utilities
 public extension CGSize {
     
-    public static func make(width: CGFloat, height: CGFloat) -> CGSize {
-        return CGSize(width: width, height: height)
-    }
-    
-    public static func make(width: Double, height: Double) -> CGSize {
-        return CGSize(width: width, height: height)
-    }
-    
-    public static func make(width: Int, height: Int) -> CGSize {
-        return CGSize(width: width, height: height)
-    }
-    
-    
-    /// 设计
+    /// 设计图比例值
     public var designScaleValue: CGSize {
-        return CGSize.make(width: width.designScaleValue, height: height.designScaleValue)
+        return CGSize(width: width.designScaleValue, height: height.designScaleValue)
     }
     
     public var maxLength: CGFloat {
@@ -76,20 +47,10 @@ public extension CGSize {
 
 // MARK: - CGPoint Layout Utilities
 public extension CGPoint {
-    public static func make(x: CGFloat, y: CGFloat) -> CGPoint {
-        return CGPoint(x: x, y: y)
-    }
     
-    public static func make(x: Double, y: Double) -> CGPoint {
-        return CGPoint(x: x, y: y)
-    }
-    
-    public static func make(x: Int, y: Int) -> CGPoint {
-        return CGPoint(x: x, y: y)
-    }
-    
+    /// 设计图比例值
     public var designScaleValue: CGPoint {
-        return CGPoint.make(x: x.designScaleValue, y: y.designScaleValue)
+        return CGPoint(x: x.designScaleValue, y: y.designScaleValue)
     }
 }
 
