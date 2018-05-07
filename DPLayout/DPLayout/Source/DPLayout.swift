@@ -110,17 +110,17 @@ public extension UIScreen {
     public static var designScale: CGFloat = width / 375.0
     
     
-    // 是否为异形(iPhoneX)屏幕
+    /// 是否为异形(iPhoneX)屏幕
     public static var isIrregular: Bool {
         return Int(size.maxLength) == 812 ? true : false
     }
     
-    // 是否为竖屏
+    /// 是否为竖屏
     public static var isPortrait: Bool {
         return UIApplication.shared.statusBarOrientation.isPortrait
     }
     
-    // 是否为横屏
+    /// 是否为横屏
     public static var isLandscape: Bool {
         return UIApplication.shared.statusBarOrientation.isLandscape
     }
